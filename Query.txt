@@ -1,0 +1,103 @@
+Q1: What is the most popular media type?
+/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\
+
+SELECT Sum(Il.quantity * Il.unitprice) AS TotalSales,
+       M.NAME,
+       M.mediatypeid
+FROM   invoiceline IL
+       JOIN track T
+         ON IL.trackid = T.trackid
+       JOIN mediatype M
+         ON T.mediatypeid = M.mediatypeid
+GROUP  BY 2
+ORDER  BY 1 DESC 
+
+
+
+==============================================================================================
+Q2 :  Who is writing the rock music ?
+/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\
+
+
+
+SELECT Ar.artistid,
+       Ar.name,
+       Count(T.name) AS Songs
+FROM   artist Ar
+       JOIN album Al
+         ON Al.artistid = Ar.artistid
+       JOIN track T
+         ON T.albumid = Al.albumid
+       JOIN genre G
+         ON T.genreid = G.genreid
+WHERE  G.name = 'Rock'
+GROUP  BY 1,
+          2
+ORDER  BY 3 DESC
+LIMIT  10 
+
+
+
+==============================================================================================
+Q3 : Determines the customer that has spent the most on music for each country ?
+/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\
+
+
+
+WITH t1
+     AS (SELECT C.country    AS Country,
+                Sum(I.total) AS TotalSpent,
+                C.firstname  AS FirstName,
+                C.lastname   AS LastName,
+                C.customerid AS CustomerId
+         FROM   customer C
+                JOIN invoice I
+                  ON C.customerid = I.customerid
+         GROUP  BY 5)
+SELECT t1.*
+FROM   t1
+       LEFT JOIN (SELECT country,
+                         firstname,
+                         lastname,
+                         Max(totalspent) AS TotalSpent,
+                         customerid
+                  FROM   t1
+                  GROUP  BY 1) t2
+              ON t1.country = t2.country
+WHERE  t1.totalspent = t2.totalspent
+ORDER  BY 1 
+
+
+
+==============================================================================================
+Q4 : Who are the best performing employees ?
+/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\
+
+
+
+SELECT Sum(IL.quantity * IL.unitprice) AS Total_Employee_Sales,
+       E.firstname,
+       E.lastname
+FROM   genre G
+       JOIN track T
+         ON T.genreid = G.genreid
+       JOIN invoiceline IL
+         ON IL.trackid = T.trackid
+       JOIN invoice I
+         ON I.invoiceid = IL.invoiceid
+       JOIN customer C
+         ON C.customerid = I.customerid
+       JOIN employee E
+         ON C.supportrepid = E.employeeid
+GROUP  BY 2
+ORDER  BY 1 DESC 
+
+
+
+==============================================================================================
+
+
+
+
+
+
